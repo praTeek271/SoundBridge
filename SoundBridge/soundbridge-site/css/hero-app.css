@@ -1,0 +1,668 @@
+/* ---- Hero Section & Live Neon Parallax Waves ---- */
+.hero {
+  position: relative;
+  padding: 8.5rem 0 4rem;
+  overflow: hidden;
+}
+
+.lanes {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 560px;
+  pointer-events: none;
+  opacity: 0.7999;
+}
+
+.lane {
+  position: absolute;
+  left: -10%;
+  width: 130%;
+  top: 50%;
+  margin-top: -40px;
+  height: 80px;
+  opacity: 0.82;
+  will-change: transform;
+}
+
+.lane svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.lane path {
+  fill: none;
+  stroke: var(--lc);
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  filter:
+    drop-shadow(0 0 4px var(--lc))
+    drop-shadow(0 0 12px var(--lc));
+  stroke-dasharray: var(--len, 1600px);
+  stroke-dashoffset: var(--len, 1600px);
+  opacity: 0;
+}
+
+/* Traveling white-hot signal packet along each neon tube */
+.lane path.pulse {
+  stroke: #ffffff;
+  stroke-width: 2;
+  opacity: 0;
+  filter:
+    drop-shadow(0 0 8px var(--lc))
+    drop-shadow(0 0 16px #ffffff);
+  stroke-dasharray: 90 1510;
+  stroke-dashoffset: 1600;
+}
+
+.lanes.is-drawn .lane path.base {
+  animation:
+    neonWaveDraw 1.5s var(--w-delay, 0.1s) cubic-bezier(0.25, 0.9, 0.25, 1) forwards,
+    neonTubeHum 3.2s calc(var(--w-delay, 0.1s) + 1.5s) ease-in-out infinite alternate;
+}
+
+.lanes.is-drawn .lane path.pulse {
+  animation: neonSignalTravel var(--p-dur, 4.2s) calc(var(--w-delay, 0.1s) + 1.2s) linear infinite;
+}
+
+@keyframes neonWaveDraw {
+  0% {
+    opacity: 1;
+    stroke-dashoffset: var(--len, 1600px);
+  }
+  100% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes neonTubeHum {
+  0% {
+    filter:
+      drop-shadow(0 0 3px var(--lc))
+      drop-shadow(0 0 10px var(--lc));
+  }
+  100% {
+    filter:
+      drop-shadow(0 0 7px var(--lc))
+      drop-shadow(0 0 20px var(--lc));
+  }
+}
+
+@keyframes neonSignalTravel {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 1600;
+  }
+  12% {
+    opacity: 0.75;
+  }
+  88% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+}
+
+.hero .wrap {
+  position: relative;
+  z-index: 2;
+}
+
+.lead {
+  margin-top: 1.4rem;
+  font-size: 1.2rem;
+  max-width: 38ch;
+  color: #D6D6D6;
+}
+
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 2rem;
+}
+
+.btn {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 50px;
+  padding: 0.7rem 1.4rem;
+  border-radius: 8px;
+  background: var(--sky);
+  color: var(--sky-ink);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.btn small {
+  font-size: 0.78rem;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.btn.alt {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.btn.alt:hover {
+  border-color: var(--sky);
+}
+
+.stage {
+  position: relative;
+  aspect-ratio: 100 / 80;
+  margin-top: 4.5rem;
+}
+
+.stage .l {
+  position: absolute;
+  margin: 0;
+  will-change: transform;
+}
+
+.l.main {
+  left: 6%;
+  width: 88%;
+  top: 0;
+  z-index: 1;
+}
+
+.l.f1 {
+  left: -1%;
+  width: 44%;
+  top: 59%;
+  z-index: 2;
+}
+
+.l.f2 {
+  right: -1%;
+  width: 44%;
+  top: 65%;
+  z-index: 2;
+}
+
+.hint {
+  margin-top: 1.2rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 700px) {
+  .stage {
+    aspect-ratio: 100 / 58;
+  }
+  .l.f1,
+  .l.f2 {
+    display: none;
+  }
+  .l.main {
+    left: 0;
+    width: 100%;
+  }
+}
+
+/* ---- Rebuilt Interactive SoundBridge Windows ---- */
+.fit {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  box-shadow: 0 40px 70px -34px #000;
+  background: #202020;
+}
+
+.app {
+  width: 960px;
+  transform-origin: 0 0;
+  font: 13px/1.35 var(--body);
+  color: #f3f3f3;
+  user-select: none;
+}
+
+.app button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tb {
+  height: 32px;
+  background: #2e2e2e;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  font-size: 12px;
+}
+
+.tb img {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+.tb i {
+  margin-left: auto;
+  font-style: normal;
+  letter-spacing: 18px;
+  color: #bbb;
+}
+
+.bd {
+  display: flex;
+  height: calc(100% - 32px);
+}
+
+.sb {
+  width: 200px;
+  flex: none;
+  padding: 14px 10px;
+  background: #1d1d1d;
+  border-right: 1px solid #333;
+  position: relative;
+}
+
+.it {
+  padding: 9px 12px;
+  border-radius: 6px;
+  display: flex;
+  color: #ddd;
+}
+
+.it.on {
+  background: #333;
+}
+
+.it.sub {
+  flex-direction: column;
+  padding-left: 34px;
+  margin: 2px 0;
+}
+
+.it.sub .g {
+  color: #3ddc84;
+}
+
+.it small,
+.cap,
+.app small {
+  color: #9a9a9a;
+  font-size: 11.5px;
+}
+
+.it.sub small {
+  color: #3ddc84;
+  opacity: 0.8;
+}
+
+.ab {
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #ddd;
+}
+
+.ct {
+  flex: 1;
+  padding: 22px 28px;
+  overflow: hidden;
+  position: relative;
+}
+
+.t {
+  font: 600 24px var(--body);
+  margin-bottom: 10px;
+}
+
+.card {
+  background: #2b2b2b;
+  border-radius: 10px;
+  padding: 12px 18px;
+}
+
+.mc {
+  display: flex;
+  justify-content: space-between;
+}
+
+.mc small {
+  display: block;
+}
+
+.mc b {
+  font-size: 16px;
+}
+
+.cap {
+  margin: 10px 0;
+}
+
+.dg svg {
+  display: block;
+  width: 100%;
+  height: 150px;
+}
+
+.app svg text {
+  fill: #bdbdbd;
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.app svg .rt {
+  text-anchor: start;
+}
+
+.nd {
+  fill: #2b2b2b;
+  stroke: #6b6b6b;
+  stroke-width: 1.5;
+}
+
+.ic {
+  fill: none;
+  stroke: #9a9a9a;
+  stroke-width: 2;
+}
+
+.ic.f {
+  fill: #9a9a9a;
+  stroke: none;
+}
+
+.o:hover .nd {
+  stroke: #5bc8f5;
+}
+
+.ln {
+  fill: none;
+  stroke: #5bc8f5;
+  stroke-width: 2;
+  opacity: 0.3;
+}
+
+.live .ln {
+  opacity: 1;
+  stroke-dasharray: 7 7;
+  animation: fl 1s linear infinite;
+}
+
+@keyframes fl {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+
+.cs {
+  margin-top: 12px;
+}
+
+.ch {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.pill {
+  border: 1px solid #4a4a4a;
+  border-radius: 16px;
+  padding: 5px 14px;
+  background: #2f2f2f;
+  display: inline-flex;
+  align-items: center;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #e5534b;
+  margin-right: 7px;
+}
+
+.pill.on .dot {
+  background: #3ddc84;
+}
+
+.cards {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+  min-height: 76px;
+}
+
+.dc {
+  width: 250px;
+  border: 1px solid #3d3d3d;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #262626;
+}
+
+.dc b {
+  font-size: 12.5px;
+  display: block;
+}
+
+.bar {
+  height: 5px;
+  border-radius: 3px;
+  background: #3a3a3a;
+  margin: 10px 0 8px;
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: #5bc8f5;
+}
+
+.b2 {
+  background: #2f2f2f;
+  border: 1px solid #4a4a4a;
+  border-radius: 6px;
+  padding: 7px 18px;
+}
+
+.pri {
+  background: #5bc8f5;
+  color: #08222f !important;
+  border-color: #5bc8f5;
+}
+
+.th {
+  display: flex;
+  justify-content: space-between;
+  color: #a8a8a8;
+  padding: 8px 0;
+  border-bottom: 1px solid #3a3a3a;
+  margin-top: 8px;
+}
+
+.th span:first-child {
+  width: 56px;
+}
+
+.th span:nth-child(2) {
+  flex: 1;
+}
+
+.r3 {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 7px 0;
+  border-bottom: 1px solid #333;
+}
+
+.r3 > div:nth-child(2) {
+  flex: 1;
+}
+
+.r3 > .chk {
+  margin: 0 40px 0 6px;
+}
+
+.r3 b {
+  display: block;
+  font-weight: 500;
+  font-size: 13.5px;
+}
+
+.chk {
+  width: 17px;
+  height: 17px;
+  border-radius: 4px;
+  border: 1px solid #bbb;
+  display: inline-grid;
+  place-items: center;
+  font-size: 12px;
+  color: transparent;
+  cursor: pointer;
+  flex: none;
+}
+
+.chk.on {
+  background: #5bc8f5;
+  border-color: #5bc8f5;
+  color: #08222f;
+}
+
+.dr {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.dr button {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #2f2f2f;
+  border: 1px solid #4a4a4a;
+  font-size: 16px;
+}
+
+.num {
+  width: 56px;
+  height: 34px;
+  border-radius: 6px;
+  background: #2b2b2b;
+  border: 1px solid #444;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+
+.rw {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 0;
+}
+
+.rw > span:first-child {
+  width: 110px;
+  font-size: 14px;
+}
+
+.sel {
+  background: #333;
+  border: 1px solid #4a4a4a;
+  border-radius: 6px;
+  padding: 7px 14px;
+  flex: 1;
+}
+
+.act {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.toast {
+  position: absolute;
+  right: 28px;
+  bottom: 20px;
+  background: #3a3a3a;
+  border-radius: 8px;
+  padding: 8px 14px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: 0.3s;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: none;
+}
+
+.info {
+  display: flex;
+  justify-content: space-between;
+  margin: 16px 0 6px;
+}
+
+.info small {
+  display: block;
+}
+
+.info b {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.r4 {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #333;
+}
+
+.r4 > span:first-child {
+  flex: 1;
+}
+
+.r4 input {
+  width: 240px;
+  accent-color: #5bc8f5;
+}
+
+.pc {
+  width: 40px;
+  text-align: right;
+  color: #bbb;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .l,
+  .lane {
+    transform: none !important;
+  }
+  .lane path.base {
+    opacity: 1;
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    animation: none !important;
+  }
+  .lane path.pulse {
+    display: none;
+  }
+  .live .ln {
+    animation: none;
+  }
+}

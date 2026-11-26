@@ -1,0 +1,85 @@
+﻿{
+    "product":  {
+                    "name":  "SoundBridge",
+                    "executableName":  "SoundBridge.exe",
+                    "manufacturer":  "Prateek Kumar Singh",
+                    "publisherAlias":  "prateek271",
+                    "version":  "1.5.0",
+                    "displayVersion":  "v 1.5.0"
+                },
+    "installer":  {
+                      "type":  "msi",
+                      "upgradeCode":  "A870E76B-B5F2-4312-B2A7-12600BDD8DD6",
+                      "productCodeMode":  "perVersion",
+                      "productCodes":  {
+                                           "1.4.0":  "DE97BA07-4316-4458-A5F4-95BB1625BBC0",
+                                           "1.4.1":  "12C08AC6-0942-4164-B932-9D67EDAD8AA4",
+                                           "1.4.2":  "CFC39E57-B9F6-4367-AB21-7E4302B511B7",
+                                           "1.4.3":  "BFE05835-59D6-42DB-A11A-ED8C9B45C4F7",
+                                           "1.5.0":  "7179A205-B4F1-4D9E-B08A-6177F9F47EEE"
+                                       },
+                      "packageCodeStrategy":  "auto",
+                      "defaultInstallMode":  "perMachine",
+                      "allowInstallModeChoice":  false,
+                      "createStartMenuShortcut":  true,
+                      "askForDesktopShortcut":  true,
+                      "defaultDesktopShortcut":  false,
+                      "preserveUserDataOnUninstall":  true
+                  },
+    "installerUi":  {
+                        "steps":  [
+                                      {
+                                          "id":  "privacy-agreement",
+                                          "title":  "Privacy Agreement",
+                                          "requiresCheckbox":  true,
+                                          "checkboxLabel":  "I agree",
+                                          "buttons":  [
+                                                          "Next"
+                                                      ]
+                                      },
+                                      {
+                                          "id":  "shortcuts",
+                                          "title":  "Shortcuts",
+                                          "description":  "Always create a Windows Start Menu shortcut. Ask whether to create a Desktop shortcut.",
+                                          "startMenuShortcutRequired":  true,
+                                          "desktopShortcutCheckbox":  true,
+                                          "buttons":  [
+                                                          "Previous",
+                                                          "Next"
+                                                      ]
+                                      },
+                                      {
+                                          "id":  "virtual-device-notice",
+                                          "title":  "Virtual Audio Device Requirement",
+                                          "description":  "Tell the user that SoundBridge requires a virtual audio device, but leave virtual device installation to the user.",
+                                          "requiresCheckbox":  false,
+                                          "downloadUrl":  null,
+                                          "buttons":  [
+                                                          "Previous",
+                                                          "Next"
+                                                      ]
+                                      },
+                                      {
+                                          "id":  "installing",
+                                          "title":  "Installing SoundBridge",
+                                          "description":  "Show the installation script/progress running.",
+                                          "buttons":  [
+                                                          "Previous"
+                                                      ]
+                                      }
+                                  ]
+                    },
+    "runtimeData":  {
+                        "root":  "%LocalAppData%\\SoundBridge",
+                        "templatesFile":  "%LocalAppData%\\SoundBridge\\templates.json",
+                        "backupFile":  "%LocalAppData%\\SoundBridge\\templates.backup.json",
+                        "logFile":  "%LocalAppData%\\SoundBridge\\logs\\app.log",
+                        "corruptedDirectory":  "%LocalAppData%\\SoundBridge\\corrupted"
+                    },
+    "virtualAudioDevice":  {
+                               "installBundledWithMsi":  false,
+                               "downloadUrl":  null,
+                               "showPrerequisiteNotice":  true,
+                               "requiresUnderstandCheckbox":  false
+                           }
+}

@@ -1,0 +1,57 @@
+<UserControl x:Class="SoundBridge.Gui.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32,24" MaxWidth="620" HorizontalAlignment="Left">
+            <TextBlock Text="Settings"
+                       FontSize="24"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,24" />
+
+            <Grid Margin="0,0,0,24">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="38" />
+                    <RowDefinition Height="38" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="90" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Start SoundBridge with Windows"
+                           VerticalAlignment="Center" />
+                <CheckBox Grid.Column="1"
+                          IsChecked="{Binding StartWithWindows}"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Center" />
+                <TextBlock Grid.Row="1"
+                           Text="Minimize to system tray on close"
+                           VerticalAlignment="Center" />
+                <CheckBox Grid.Row="1"
+                          Grid.Column="1"
+                          IsChecked="{Binding MinimizeToTray}"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Center" />
+            </Grid>
+
+            <Border Height="1" Background="{StaticResource StrokeBrush}" Margin="0,0,0,20" />
+
+            <TextBlock Text="Configuration"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,8" />
+            <TextBlock Text="{Binding ConfigPath}"
+                       Foreground="{StaticResource MutedTextBrush}"
+                       FontSize="13"
+                       Margin="0,0,0,16" />
+
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Open folder" Command="{Binding OpenFolderCommand}" Margin="0,0,12,0" />
+                <Button Content="Reset to defaults" Command="{Binding ResetCommand}" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

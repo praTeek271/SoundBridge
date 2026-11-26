@@ -1,0 +1,141 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package
+    Name="$(var.ProductName)"
+    Manufacturer="$(var.Manufacturer)"
+    Version="$(var.ProductVersion)"
+    ProductCode="$(var.ProductCode)"
+    UpgradeCode="$(var.UpgradeCode)"
+    Scope="perMachine">
+
+    <SummaryInformation
+      Description="$(var.ProductName) installer"
+      Manufacturer="$(var.Manufacturer)" />
+
+    <MajorUpgrade
+      AllowSameVersionUpgrades="yes"
+      Schedule="afterInstallValidate"
+      DowngradeErrorMessage="A newer version of $(var.ProductName) is already installed." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <Property Id="INSTALLSCOPE" Value="perMachine" />
+    <Property Id="CREATE_DESKTOP_SHORTCUT" Secure="yes" />
+    <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
+    <Icon Id="ProductIcon" SourceFile="$(var.AppIconPath)" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)\PrivacyAgreement.rtf" />
+    <WixVariable Id="WixUICostingPopupOptOut" Value="1" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="$(var.ProductName)" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+
+    <Feature Id="MainFeature" Title="$(var.ProductName)" Level="1">
+      <ComponentGroupRef Id="PublishedFiles" />
+      <ComponentRef Id="ApplicationShortcuts" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+
+    <ComponentGroup Id="PublishedFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.PublishDir)\**" />
+    </ComponentGroup>
+
+    <Component Id="ApplicationShortcuts" Directory="ApplicationProgramsFolder" Guid="*">
+      <Shortcut
+        Id="StartMenuShortcut"
+        Name="$(var.ProductName)"
+        Target="[INSTALLFOLDER]$(var.ExecutableName)"
+        WorkingDirectory="INSTALLFOLDER" />
+      <RemoveFolder Id="RemoveApplicationProgramsFolder" On="uninstall" />
+      <RegistryValue
+        Root="HKCU"
+        Key="Software\$(var.ProductName)"
+        Name="StartMenuShortcut"
+        Type="integer"
+        Value="1"
+        KeyPath="yes" />
+    </Component>
+
+    <Component Id="DesktopShortcut" Directory="DesktopFolder" Guid="*" Condition="CREATE_DESKTOP_SHORTCUT = 1">
+      <Shortcut
+        Id="DesktopShortcut"
+        Name="$(var.ProductName)"
+        Target="[INSTALLFOLDER]$(var.ExecutableName)"
+        WorkingDirectory="INSTALLFOLDER" />
+      <RegistryValue
+        Root="HKCU"
+        Key="Software\$(var.ProductName)"
+        Name="DesktopShortcut"
+        Type="integer"
+        Value="1"
+        KeyPath="yes" />
+    </Component>
+
+    <UI>
+      <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+      <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+      <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+
+      <DialogRef Id="BrowseDlg" />
+      <DialogRef Id="CancelDlg" />
+      <DialogRef Id="DiskCostDlg" />
+      <DialogRef Id="ErrorDlg" />
+      <DialogRef Id="ExitDialog" />
+      <DialogRef Id="FatalError" />
+      <DialogRef Id="FilesInUse" />
+      <DialogRef Id="InstallDirDlg" />
+      <DialogRef Id="LicenseAgreementDlg" />
+      <DialogRef Id="PrepareDlg" />
+      <DialogRef Id="ProgressDlg" />
+      <DialogRef Id="UserExit" />
+      <DialogRef Id="VerifyReadyDlg" />
+      <DialogRef Id="WelcomeDlg" />
+
+      <Dialog Id="ShortcutOptionsDlg" Width="370" Height="270" Title="$(var.ProductName) Setup">
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="340" Height="20" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Shortcuts" />
+        <Control Id="Description" Type="Text" X="25" Y="36" Width="320" Height="34" Transparent="yes" NoPrefix="yes" Text="A Start Menu shortcut will be created. Choose whether SoundBridge should also add a Desktop shortcut." />
+        <Control Id="DesktopShortcutCheckBox" Type="CheckBox" X="25" Y="88" Width="300" Height="17" CheckBoxValue="1" Property="CREATE_DESKTOP_SHORTCUT" Text="Create a Desktop shortcut" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)" />
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+      </Dialog>
+
+      <Dialog Id="VirtualAudioDeviceNoticeDlg" Width="370" Height="270" Title="$(var.ProductName) Setup">
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="340" Height="20" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Virtual Audio Device Requirement" />
+        <Control Id="Description" Type="Text" X="25" Y="36" Width="320" Height="72" Transparent="yes" NoPrefix="yes" Text="SoundBridge routes audio from a virtual device into your selected output devices. Please install or keep your preferred virtual audio device available before using routing." />
+        <Control Id="Note" Type="Text" X="25" Y="116" Width="320" Height="52" Transparent="yes" NoPrefix="yes" Text="This installer only installs SoundBridge. Virtual audio device installation is left to you so the app does not install driver-level software without your direct choice." />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)" />
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)" />
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+      </Dialog>
+
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg" />
+      <Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" />
+      <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="ShortcutOptionsDlg" Condition="LicenseAccepted = &quot;1&quot;" />
+      <Publish Dialog="ShortcutOptionsDlg" Control="Back" Event="NewDialog" Value="LicenseAgreementDlg" />
+      <Publish Dialog="ShortcutOptionsDlg" Control="Next" Event="NewDialog" Value="VirtualAudioDeviceNoticeDlg" />
+      <Publish Dialog="VirtualAudioDeviceNoticeDlg" Control="Back" Event="NewDialog" Value="ShortcutOptionsDlg" />
+      <Publish Dialog="VirtualAudioDeviceNoticeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" />
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="VirtualAudioDeviceNoticeDlg" />
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1" />
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="2" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" />
+      <Publish Dialog="VerifyReadyDlg" Control="Install" Event="EndDialog" Value="Return" />
+      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" />
+    </UI>
+  </Package>
+</Wix>

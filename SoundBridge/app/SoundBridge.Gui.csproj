@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>false</ImplicitUsings>
+    <AssemblyName>SoundBridge</AssemblyName>
+    <Product>SoundBridge</Product>
+    <Description>Multi-output audio routing bridge</Description>
+    <RootNamespace>SoundBridge.Gui</RootNamespace>
+    <StartupObject>SoundBridge.Gui.App</StartupObject>
+    <ApplicationIcon>assets\icon.ico</ApplicationIcon>
+    <ApplicationManifest />
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\backend\build-integration\Release\SoundBridgeBridge.dll"
+          Link="SoundBridgeBridge.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Condition="Exists('..\backend\build-integration\Release\SoundBridgeBridge.dll')" />
+    <None Include="assets\beep.wav"
+          Link="asset\beep.wav"
+          CopyToOutputDirectory="PreserveNewest"
+          Condition="Exists('assets\beep.wav')" />
+    <None Include="assets\icon.png"
+          Link="assets\icon.png"
+          CopyToOutputDirectory="PreserveNewest"
+          Condition="Exists('assets\icon.png')" />
+    <None Include="..\app.meta.json"
+          Link="app.meta.json"
+          CopyToOutputDirectory="PreserveNewest"
+          Condition="Exists('..\app.meta.json')" />
+  </ItemGroup>
+</Project>

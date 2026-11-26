@@ -1,0 +1,282 @@
+/* ---- Cinematic Preloader (Sandblasted Black Metal, Glare, Turn & 4-Card Forge Merge) ---- */
+#preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: radial-gradient(circle at 50% 50%, #222 0%, #0d0d0d 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.7s cubic-bezier(0.6, 0, 0.2, 1), visibility 0.7s cubic-bezier(0.6, 0, 0.2, 1);
+    perspective: 900px;
+}
+
+#preloader.loaded {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.metal-scene {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    display: grid;
+    place-items: center;
+    transform-style: preserve-3d;
+}
+
+.metal-core {
+    position: relative;
+    z-index: 2;
+    width: 90px;
+    height: 90px;
+    border-radius: 22px;
+    background:
+        radial-gradient(rgba(255, 255, 255, 0.14) 0.6px, transparent 0.7px) 0 0 / 7px 7px,
+        linear-gradient(135deg, #2c2c2c, #141414);
+    border: 1px solid rgba(91, 200, 245, 0.28);
+    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.16);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    transition: transform 0.65s cubic-bezier(0.3, 1.5, 0.4, 1), box-shadow 0.65s ease, border-color 0.4s ease;
+}
+
+.metal-core img {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    object-fit: cover;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.65));
+}
+
+.metal-core.forged {
+    transform: scale(1.18);
+    border-color: rgba(91, 200, 245, 0.8);
+    box-shadow: 0 0 36px rgba(91, 200, 245, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.28);
+}
+
+.metal-orbit {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    animation: metalOrbit 11s linear infinite;
+    transform-style: preserve-3d;
+}
+
+.metal-orbit.paused,
+.metal-orbit.paused .tile-turn {
+    animation-play-state: paused;
+}
+
+.glyph-tile {
+    position: absolute;
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    overflow: hidden;
+    background:
+        radial-gradient(rgba(255, 255, 255, 0.14) 0.6px, transparent 0.7px) 0 0 / 7px 7px,
+        radial-gradient(rgba(91, 200, 245, 0.18) 0.5px, transparent 0.7px) 3px 4px / 11px 11px,
+        linear-gradient(145deg, #272727, #141414);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    display: grid;
+    place-items: center;
+    color: #6c7a82;
+    transform-style: preserve-3d;
+    transform: translate(var(--tx), var(--ty));
+    transition:
+        color 0.4s ease,
+        border-color 0.4s ease,
+        box-shadow 0.4s ease,
+        transform 0.65s cubic-bezier(0.3, 1.5, 0.4, 1),
+        opacity 0.55s ease;
+}
+
+/* Sweeping metallic glare across each card */
+.glyph-tile::after {
+    content: "";
+    position: absolute;
+    inset: -50%;
+    background: linear-gradient(115deg,
+            transparent 35%,
+            rgba(255, 255, 255, 0.08) 46%,
+            rgba(91, 200, 245, 0.36) 50%,
+            rgba(255, 255, 255, 0.08) 54%,
+            transparent 65%);
+    transform: translateX(-120%) rotate(15deg);
+    animation: cardGlare 4.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    animation-delay: var(--delay, 0s);
+    pointer-events: none;
+}
+
+.glyph-tile svg {
+    width: 38px;
+    height: 38px;
+    overflow: visible;
+    transition: filter 0.35s ease;
+}
+
+.glyph-tile svg path,
+.glyph-tile svg rect,
+.glyph-tile svg circle {
+    fill: currentColor;
+}
+
+.glyph-tile svg .stroke-only {
+    fill: none;
+    stroke: currentColor;
+}
+
+.glyph-tile.active {
+    color: #5bc8f5;
+    border-color: rgba(91, 200, 245, 0.48);
+    box-shadow:
+        0 12px 28px rgba(0, 0, 0, 0.65),
+        0 0 20px rgba(91, 200, 245, 0.25),
+        inset 0 1px 2px rgba(91, 200, 245, 0.28);
+}
+
+.glyph-tile.active svg {
+    filter: drop-shadow(0 0 8px rgba(91, 200, 245, 0.4));
+}
+
+/* Counter-rotation + subtle 3D card turning wrapper */
+.tile-turn {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    animation: tileCounter 11s linear infinite, cardTurn 5.5s ease-in-out infinite;
+    animation-delay: 0s, var(--delay, 0s);
+}
+
+.glyph-tile:nth-child(1) {
+    top: 0;
+    left: calc(50% - 36px);
+    --tx: 0px;
+    --ty: -14px;
+}
+
+.glyph-tile:nth-child(2) {
+    right: 0;
+    top: calc(50% - 36px);
+    --tx: 14px;
+    --ty: 0px;
+}
+
+.glyph-tile:nth-child(3) {
+    bottom: 0;
+    left: calc(50% - 36px);
+    --tx: 0px;
+    --ty: 14px;
+}
+
+.glyph-tile:nth-child(4) {
+    left: 0;
+    top: calc(50% - 36px);
+    --tx: -14px;
+    --ty: 0px;
+}
+
+/* Forge merge state when load hits 100% */
+.glyph-tile.merging:nth-child(1) {
+    transform: translate(0px, 114px) scale(0.2);
+    opacity: 0;
+}
+
+.glyph-tile.merging:nth-child(2) {
+    transform: translate(-114px, 0px) scale(0.2);
+    opacity: 0;
+}
+
+.glyph-tile.merging:nth-child(3) {
+    transform: translate(0px, -114px) scale(0.2);
+    opacity: 0;
+}
+
+.glyph-tile.merging:nth-child(4) {
+    transform: translate(114px, 0px) scale(0.2);
+    opacity: 0;
+}
+
+.load-status {
+    margin-top: 2.2rem;
+    font-family: var(--display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #8a8a8a;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+}
+
+.load-status.ready {
+    color: #5bc8f5;
+}
+
+@keyframes metalOrbit {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes tileCounter {
+    from {
+        transform: rotate(360deg);
+    }
+
+    to {
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes cardTurn {
+
+    0%,
+    100% {
+        transform: rotateX(0deg) rotateY(0deg) rotateZ(-2deg);
+    }
+
+    25% {
+        transform: rotateX(7deg) rotateY(-9deg) rotateZ(2deg);
+    }
+
+    50% {
+        transform: rotateX(-5deg) rotateY(8deg) rotateZ(-1.5deg);
+    }
+
+    75% {
+        transform: rotateX(6deg) rotateY(6deg) rotateZ(2.5deg);
+    }
+}
+
+@keyframes cardGlare {
+
+    0%,
+    20% {
+        transform: translateX(-120%) rotate(15deg);
+    }
+
+    55%,
+    100% {
+        transform: translateX(120%) rotate(15deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .glyph-tile,
+    .glyph-tile::after,
+    .tile-turn,
+    .metal-orbit {
+        animation: none !important;
+    }
+}

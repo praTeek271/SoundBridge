@@ -1,0 +1,115 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"   # triggers on  v1.5.0  v2.0.0  etc.
+
+permissions:
+  contents: write   # needed to create GitHub Releases and upload assets
+
+jobs:
+  build-and-release:
+    name: Build MSI & publish release
+    runs-on: windows-latest
+
+    steps:
+      # ── Checkout ─────────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so the changelog step can read it
+
+      # ── Read version from tag ────────────────────────────────────────────────
+      - name: Extract version from tag
+        id: version
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"          # e.g. v1.5.0
+          $ver = $tag.TrimStart('v')               # e.g. 1.5.0
+          echo "TAG=$tag"   >> $env:GITHUB_OUTPUT
+          echo "VER=$ver"   >> $env:GITHUB_OUTPUT
+
+      # ── Verify app.meta.json version matches the tag ─────────────────────────
+      - name: Verify version consistency
+        shell: pwsh
+        run: |
+          $meta    = Get-Content app.meta.json | ConvertFrom-Json
+          $metaVer = [string]$meta.product.version
+          $tagVer  = "${{ steps.version.outputs.VER }}"
+          if ($metaVer -ne $tagVer) {
+            Write-Error "app.meta.json version ($metaVer) does not match tag ($tagVer). Bump the version before tagging."
+            exit 1
+          }
+          Write-Host "Version check passed: $metaVer"
+
+      # ── Setup tools ──────────────────────────────────────────────────────────
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.x"
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Install WiX Toolset CLI
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix
+          wix extension add WixToolset.UI.wixext
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "latest"
+
+      # ── Build ────────────────────────────────────────────────────────────────
+      - name: Build MSI
+        shell: pwsh
+        run: .\installer\build-msi.bat
+
+      # ── Locate MSI artifact ──────────────────────────────────────────────────
+      - name: Find MSI path
+        id: msi
+        shell: pwsh
+        run: |
+          $msi = Get-ChildItem -Path dist\installer -Filter "*.msi" | Select-Object -First 1
+          if (-not $msi) { Write-Error "No MSI found in dist\installer"; exit 1 }
+          echo "PATH=$($msi.FullName)" >> $env:GITHUB_OUTPUT
+          echo "NAME=$($msi.Name)"     >> $env:GITHUB_OUTPUT
+          Write-Host "MSI: $($msi.FullName)"
+
+      # ── Extract changelog section for this release ───────────────────────────
+      - name: Extract release notes from CHANGELOG.md
+        id: notes
+        shell: pwsh
+        run: |
+          $tag     = "${{ steps.version.outputs.TAG }}"
+          $ver     = "${{ steps.version.outputs.VER }}"
+          $lines   = Get-Content CHANGELOG.md
+          $capture = $false
+          $body    = @()
+
+          foreach ($line in $lines) {
+            if ($line -match "^## \[$ver\]") { $capture = $true; continue }
+            if ($capture -and $line -match "^## \[")  { break }
+            if ($capture) { $body += $line }
+          }
+
+          $notes = ($body | Where-Object { $_ -ne "" } | Out-String).Trim()
+          if (-not $notes) { $notes = "See CHANGELOG.md for details." }
+
+          # Write to a temp file to avoid shell quoting issues
+          $notes | Set-Content -Path "$env:RUNNER_TEMP\release_notes.md" -Encoding UTF8
+          echo "FILE=$env:RUNNER_TEMP\release_notes.md" >> $env:GITHUB_OUTPUT
+
+      # ── Publish GitHub Release ───────────────────────────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.TAG }}
+          name: SoundBridge ${{ steps.version.outputs.TAG }}
+          body_path: ${{ steps.notes.outputs.FILE }}
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.TAG, '-') }}
+          files: ${{ steps.msi.outputs.PATH }}
