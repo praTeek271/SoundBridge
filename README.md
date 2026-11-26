@@ -1,135 +1,228 @@
-<h1 align="center">
-  <img src="SoundBridge/docs/icon.png" width="88" alt="SoundBridge icon" /><br/>
-  SoundBridge
-</h1>
+# SoundBridge — Developer Guide
+
+> **Target audience:** Contributors, integrators, and developers working on or building SoundBridge internals.  
+> For the end-user download and feature guide, see the [Root README](../README.md).
+
+---
+
+## Architecture Overview
+
+SoundBridge is a modular two-layer desktop application separating the WPF user presentation from the real-time WASAPI audio routing engine.
 
 <p align="center">
-  <strong>Send your audio everywhere — simultaneously.</strong><br/>
-  One source. Every speaker, headphone, and monitor at once.<br/>
-  No subscriptions. No bloat. Just audio, routed your way.
+  <img src="docs/architecture.svg" alt="SoundBridge Architecture Diagram" width="100%" />
 </p>
-
-<p align="center">
-  <a href="https://github.com/prateek271/SoundBridge/releases/latest">
-    <img src="https://img.shields.io/badge/⬇ Download-v1.5.0 MSI-blue?style=for-the-badge" alt="Download MSI" />
-  </a>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Windows%2010%2F11-supported-0078D4?style=flat-square&logo=windows" />
-  <img src="https://img.shields.io/badge/version-1.5.0-blue?style=flat-square" />
-  <img src="https://img.shields.io/badge/license-PolyForm%20Strict%201.0.0-red?style=flat-square" />
-</p>
-
----
-
-## What is SoundBridge?
-
-SoundBridge is a **Windows audio routing app** that lets you play audio through **multiple output devices at the same time** — speakers, headphones, HDMI, Bluetooth — all from a single source, perfectly in sync.
-
-Whether you're a content creator monitoring your stream on headphones while speakers fill the room, a home studio engineer running multiple monitor pairs, or just someone who wants audio everywhere — SoundBridge handles it.
-
----
-
-## Download & Install
-
-> **Requirements:** Windows 10 (build 1809) or later · 64-bit
-
-1. 👉 **[Download the latest MSI from Releases](https://github.com/prateek271/SoundBridge/releases/latest)**
-2. Run `SoundBridgeSetup-v1.5.0.msi`
-3. Accept the privacy agreement, pick your shortcut preference, and click Install
-4. Launch **SoundBridge** from the Start Menu — you're ready
-
----
-
-## How to Use
-
-```
-1. Open SoundBridge — the Devices page greets you
-2. Click  +  in the sidebar to create a new Multi-Output Device template
-3. Name your template (e.g. "Headphones + Speakers")
-4. Pick a source device and tick the outputs you want audio sent to
-5. Set volume and delay per output if needed
-6. Click  Apply Configuration → Select  — Calibration page opens automatically
-7. Press  Start Routing  — audio now flows to all selected outputs
-8. Use  Play Test Beeps  to verify sync and fine-tune delays
-9. Minimize to tray — routing continues silently in the background
-```
-
----
-
-## Features
-
-### 🔊 Multi-Output Routing
-
-Route audio to as many physical devices as you want simultaneously — with no quality loss. Your headphones, desk speakers, and HDMI display can all play at once.
-
-### 🎛️ Per-Output Volume
-
-Each output gets its own independent volume level, saved in your template.
-
-### ⏱️ Delay Compensation
-
-Add millisecond delay per output to keep physically distant speakers in perfect sync.
-
-### 📋 Named Templates
-
-Save your routing setups as named templates. Switch between "Gaming", "Studio", and "Surround" in one click. Delete any template with the trash icon in the sidebar.
-
-### 📡 Live Status
-
-The Devices page shows a live flowchart of active routing, a VU meter, and a **Windows active output indicator** — you always know exactly where your audio is going.
-
-### 🔔 System Tray
-
-Minimize to tray and SoundBridge keeps routing in the background. Right-click the tray icon to restore, stop routing, or exit.
-
-### 🚀 Start with Windows
-
-Enable in Settings and SoundBridge is ready before your first app opens.
-
----
-
-## Do I Need a Virtual Audio Device?
-
-**No — SoundBridge works with any audio device as the source**, including physical ones.
-
-However, many users pair it with a **virtual audio device** to capture application audio (browser, music player, game) and route it to multiple outputs. Two popular free options:
 
 <details>
-<summary>Optional: virtual audio drivers</summary>
+<summary>Click to view text architecture diagram</summary>
 
-| Driver | License | Use |
-| --- | --- | --- |
-| [MikeTheTech Virtual Audio Driver](https://github.com/MikeTheTech/VAD) | MIT | Set as output in any app; SoundBridge routes from it |
-| [VB-Cable](https://vb-audio.com/Cable/) | Freeware | Same idea — classic freeware option |
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│                   GUI LAYER (C# · .NET 8 · WPF / MVVM)                 │
+│   Views (XAML Controls) ⟷ ViewModels ⟷ Services (IAudioRouterService) │
+│   Assembly: SoundBridge.exe                                            │
+└──────────────────────────────────┬─────────────────────────────────────┘
+                                   │ P/Invoke calls
+┌──────────────────────────────────▼─────────────────────────────────────┐
+│                       P/INVOKE INTEROP BOUNDARY                        │
+│   NativeAudioRouterInterop.cs ⟷ SoundBridgeBridge.dll (C Exports)      │
+└──────────────────────────────────┬─────────────────────────────────────┘
+                                   │ C-linkage APIs
+┌──────────────────────────────────▼─────────────────────────────────────┐
+│                 NATIVE AUDIO ENGINE (C++17 · WASAPI · WIN32)           │
+│   WASAPI Capture Client ➔ Multi-Sink Mixing Loop ➔ Render Clients (×N) │
+└──────────────────────────────────┬─────────────────────────────────────┘
+                                   │ Synchronized audio frames
+         ┌─────────────────────────┼─────────────────────────┐
+         ▼                         ▼                         ▼
+  🎧 Headphones             🔊 Desk Speakers          📡 HDMI / Bluetooth
+```
 
-Install either one, set your app (Spotify, browser, DAW…) to output to the virtual device, and choose that virtual device as the **master source** in SoundBridge.
+</details>
+
+The GUI communicates with the native backend exclusively through [`NativeAudioRouterInterop.cs`](app/Services/NativeAudioRouterInterop.cs) via P/Invoke into `SoundBridgeBridge.dll`. No COM activation or WinRT is used in the routing path.
+
+---
+
+## Application State & Navigation Flow
+
+This flowchart illustrates the navigation lifecycle and state transitions across ViewModels (`MainViewModel`, `DevicesViewModel`, `DeviceWorkspaceViewModel`, `CalibrationViewModel`):
+
+<p align="center">
+  <img src="docs/app-flow.svg" alt="Application Flow Diagram" width="100%" />
+</p>
+
+<details>
+<summary>Click to view text lifecycle breakdown</summary>
+
+```text
+[Launch SoundBridge]
+         │
+         ▼
+[1. Devices Dashboard] ──────────► [2. Device Workspace]
+ (WASAPI Device Scan,                (Pick Master Source,
+  Windows Default Output)             Select Output Sinks,
+                                      Set Volume & Delay ms)
+                                             │
+                                             ▼
+                                  [Apply Configuration]
+                                     (Auto-navigates)
+                                             │
+                                             ▼
+[4. Active Audio Routing] ◄─────── [3. Calibration Page]
+ (120ms Polling Tick,                 (Play Test Beeps,
+  Live Peak Level Meter,               Start / Disable Routing,
+  Multi-Sink Fan-Out)                  Update Routing Live)
+         │
+         ▼
+[5. System Tray Mode]
+ (Background Operation,
+  Restore / Stop / Exit)
+```
 
 </details>
 
 ---
 
-## System Requirements
+## Repository Layout
 
-| | Minimum |
-| --- | --- |
-| OS | Windows 10 version 1809 (build 17763) or later |
-| Architecture | x64 |
-| Runtime | Included (self-contained install) |
-| Disk | ~80 MB |
+```
+/                               ← Repository root
+├── .github/
+│   └── workflows/
+│       ├── build.yml           ← CI: build verification on push/PR to main
+│       └── release.yml         ← CD: WiX MSI build & GitHub Release on vX.Y.Z tag
+├── SoundBridge/
+│   ├── app/                    ← C# WPF GUI (SoundBridge.Gui.csproj)
+│   │   ├── Models/             ← Pure data models (AudioDeviceDescriptor, AppSettings, ...)
+│   │   ├── Services/           ← Business logic, COM interop & P/Invoke
+│   │   ├── ViewModels/         ← MVVM ViewModels (INotifyPropertyChanged)
+│   │   ├── Views/              ← XAML pages & Controls
+│   │   └── assets/             ← icon.ico, icon.png, beep.wav
+│   ├── backend/                ← C++17 native audio engine (CMake)
+│   │   ├── src/
+│   │   │   ├── audio/          ← WASAPI capture & render abstractions
+│   │   │   ├── engine/         ← Multi-sink routing & mixing loop
+│   │   │   ├── bridge/         ← Flat C-linkage exports for P/Invoke
+│   │   │   └── util/           ← COM helpers, GUIDs & logging
+│   │   └── CMakeLists.txt
+│   ├── installer/              ← WiX v4 MSI packaging
+│   │   ├── Package.wxs         ← WiX component declarations
+│   │   ├── build-msi.ps1       ← Packaging script with auto ProductCode generation
+│   │   ├── build-msi.bat       ← Entrypoint wrapper
+│   │   └── PrivacyAgreement.rtf
+│   ├── docs/                   ← Visual documentation & architectural specs
+│   ├── soundbridge-site/       ← Product landing website
+│   └── CHANGELOG.md
+├── README.md                   ← End-user landing page
+└── .gitignore
+```
 
 ---
 
-## Privacy
+## Tech Stack
 
-SoundBridge stores templates and settings **only on your local machine** under `%LocalAppData%\SoundBridge`. It makes no network connections, collects no telemetry, and sends nothing anywhere.
+| Layer | Technology |
+|---|---|
+| GUI Framework | WPF / .NET 8 (`net8.0-windows`) |
+| Architectural Pattern | MVVM (`INotifyPropertyChanged`, `RelayCommand`) |
+| Audio Engine | WASAPI (Windows Audio Session API) in Win32 C++ |
+| Native Interop | P/Invoke via `SoundBridgeBridge.dll` (C-linkage exports) |
+| Native Build | CMake 3.20+, C++17, MSVC x64 |
+| Installer | WiX Toolset v4 (MSI, per-machine) |
+| CI/CD | GitHub Actions (`windows-latest` runners) |
+| Versioning | Semantic Versioning (`vMAJOR.MINOR.PATCH`) |
 
 ---
 
-## Changelog
+## Prerequisites
 
-See [CHANGELOG.md](SoundBridge/CHANGELOG.md) for what's new in each version.
+| Tool | Version | Required For |
+|---|---|---|
+| Visual Studio 2022 | 17.8+ | C++ MSVC v143 toolset (`Desktop development with C++`) |
+| .NET 8 SDK | 8.x | WPF application build & publish |
+| CMake | 3.20+ | Native backend configure and build |
+| WiX Toolset CLI | v4+ | MSI packaging (`dotnet tool install --global wix`) |
+
+---
+
+## Building Locally
+
+### 1. Clone the Repository
+
+```powershell
+git clone https://github.com/prateek271/SoundBridge.git
+cd SoundBridge/SoundBridge
+```
+
+### 2. Build Native Audio Engine
+
+```powershell
+cmake -S backend -B backend/build-integration -A x64
+cmake --build backend/build-integration --config Release
+# Generates: backend/build-integration/Release/SoundBridgeBridge.dll
+```
+
+### 3. Build & Run the WPF GUI
+
+```powershell
+# Debug build for local development
+dotnet build app/SoundBridge.Gui.csproj -c Debug
+
+# Run the app
+dotnet run --project app/SoundBridge.Gui.csproj
+```
+
+*(The `.csproj` automatically copies `SoundBridgeBridge.dll` into the output directory upon build).*
+
+### 4. Build the MSI Installer
+
+```powershell
+.\installer\build-msi.bat
+# Generates: dist/installer/SoundBridgeSetup-v<version>.msi
+```
+
+---
+
+## Key Source Files
+
+### GUI Layer (`app/`)
+
+| File | Purpose |
+|---|---|
+| [`NativeAudioRouterService.cs`](app/Services/NativeAudioRouterService.cs) | Production audio service executing P/Invoke into `SoundBridgeBridge.dll` |
+| [`MockAudioRouterService.cs`](app/Services/MockAudioRouterService.cs) | Standalone dummy router used for fast UI testing without audio hardware |
+| [`SystemDefaultAudioEndpointService.cs`](app/Services/SystemDefaultAudioEndpointService.cs) | Direct COM interop (`IMMDeviceEnumerator`) detecting active Windows playback device |
+| [`JsonTemplateStore.cs`](app/Services/JsonTemplateStore.cs) | Persists user device routing profiles to `%LocalAppData%\SoundBridge\templates.json` |
+| [`JsonAppSettingsStore.cs`](app/Services/JsonAppSettingsStore.cs) | Persists user configurations to `%LocalAppData%\SoundBridge\settings.json` |
+| [`DevicesViewModel.cs`](app/ViewModels/DevicesViewModel.cs) | Overview dashboard with live VU level monitoring and 120ms polling loop |
+| [`DeviceWorkspaceViewModel.cs`](app/ViewModels/DeviceWorkspaceViewModel.cs) | Routing matrix editor for selecting inputs/outputs and latency offsets |
+| [`CalibrationViewModel.cs`](app/ViewModels/CalibrationViewModel.cs) | Routing activation control and calibration test tone generator |
+
+### Native Audio Backend (`backend/src/`)
+
+| Directory | Purpose |
+|---|---|
+| [`audio/`](backend/src/audio/) | WASAPI `IMMDevice`, `IAudioClient`, and `IAudioRenderClient` wrappers |
+| [`engine/`](backend/src/engine/) | Low-latency audio loop fanning out capture audio to multiple render clients |
+| [`bridge/`](backend/src/bridge/) | Flat C exports (`StartRouting`, `StopRouting`, `EnumerateDevices`, `GetPeakLevel`) |
+| [`util/`](backend/src/util/) | COM memory lifecycle management, HRESULT checking, and thread synchronization |
+
+---
+
+## Release & Versioning Strategy
+
+Releases adhere to [Semantic Versioning](https://semver.org/) (`vMAJOR.MINOR.PATCH`).
+
+To create a new release:
+1. Document release notes in [`CHANGELOG.md`](CHANGELOG.md).
+2. Commit and push your changes to `main`.
+3. Tag the release commit and push the tag:
+   ```powershell
+   git tag v1.5.0
+   git push origin v1.5.0
+   ```
+4. GitHub Actions [`release.yml`](../.github/workflows/release.yml) triggers automatically on the tag push, builds the MSI installer in a clean environment, and publishes the release on GitHub.
 
 ---
 

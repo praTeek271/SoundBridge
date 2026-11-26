@@ -113,7 +113,8 @@ This flowchart illustrates the navigation lifecycle and state transitions across
 │   │   └── PrivacyAgreement.rtf
 │   ├── docs/                   ← Visual documentation & architectural specs
 │   ├── soundbridge-site/       ← Product landing website
-│   ├── app.meta.json           ← Product versioning & installer metadata (Single Source of Truth)
+| Metadata | `app.meta.json` — drives versioning and GUIDs 
+|   |
 │   └── CHANGELOG.md
 ├── README.md                   ← End-user landing page
 └── .gitignore
@@ -124,7 +125,7 @@ This flowchart illustrates the navigation lifecycle and state transitions across
 ## Tech Stack
 
 | Layer | Technology |
-|---|---|
+| --- | --- |
 | GUI Framework | WPF / .NET 8 (`net8.0-windows`) |
 | Architectural Pattern | MVVM (`INotifyPropertyChanged`, `RelayCommand`) |
 | Audio Engine | WASAPI (Windows Audio Session API) in Win32 C++ |
@@ -132,14 +133,14 @@ This flowchart illustrates the navigation lifecycle and state transitions across
 | Native Build | CMake 3.20+, C++17, MSVC x64 |
 | Installer | WiX Toolset v4 (MSI, per-machine) |
 | CI/CD | GitHub Actions (`windows-latest` runners) |
-| Metadata | `app.meta.json` — drives versioning and MSI ProductCode GUIDs |
+| Versioning | `app.meta.json` — drives versioning and GUIDs |
 
 ---
 
 ## Prerequisites
 
 | Tool | Version | Required For |
-|---|---|---|
+| --- | --- | --- |
 | Visual Studio 2022 | 17.8+ | C++ MSVC v143 toolset (`Desktop development with C++`) |
 | .NET 8 SDK | 8.x | WPF application build & publish |
 | CMake | 3.20+ | Native backend configure and build |
@@ -190,7 +191,7 @@ dotnet run --project app/SoundBridge.Gui.csproj
 ### GUI Layer (`app/`)
 
 | File | Purpose |
-|---|---|
+| --- | --- |
 | [`NativeAudioRouterService.cs`](app/Services/NativeAudioRouterService.cs) | Production audio service executing P/Invoke into `SoundBridgeBridge.dll` |
 | [`MockAudioRouterService.cs`](app/Services/MockAudioRouterService.cs) | Standalone dummy router used for fast UI testing without audio hardware |
 | [`SystemDefaultAudioEndpointService.cs`](app/Services/SystemDefaultAudioEndpointService.cs) | Direct COM interop (`IMMDeviceEnumerator`) detecting active Windows playback device |
@@ -203,7 +204,7 @@ dotnet run --project app/SoundBridge.Gui.csproj
 ### Native Audio Backend (`backend/src/`)
 
 | Directory | Purpose |
-|---|---|
+| --- | --- |
 | [`audio/`](backend/src/audio/) | WASAPI `IMMDevice`, `IAudioClient`, and `IAudioRenderClient` wrappers |
 | [`engine/`](backend/src/engine/) | Low-latency audio loop fanning out capture audio to multiple render clients |
 | [`bridge/`](backend/src/bridge/) | Flat C exports (`StartRouting`, `StopRouting`, `EnumerateDevices`, `GetPeakLevel`) |
@@ -213,7 +214,7 @@ dotnet run --project app/SoundBridge.Gui.csproj
 
 ## Release & Versioning Strategy
 
-Version numbers are governed by [`app.meta.json`](app.meta.json):
+Releases adhere to [Semantic Versioning](https://semver.org/) (`vMAJOR.MINOR.PATCH`).
 
 ```json
 {
@@ -226,14 +227,17 @@ Version numbers are governed by [`app.meta.json`](app.meta.json):
 ```
 
 To create a new release:
-1. Update version in `app.meta.json` and document entries in `CHANGELOG.md`.
-2. Commit and push changes to `main`.
+
+1. Update version in `app.meta.json`.
+2. Commit and push changes to `feature-{feature_name}`.
 3. Tag the release commit and push:
-   ```powershell
-   git tag v1.5.0
-   git push origin v1.5.0
-   ```
-4. GitHub Actions `release.yml` triggers automatically, builds the installer, and uploads the `.msi` to GitHub Releases.
+
+  ```powershell
+   git tag vX.X.X
+   git push origin vX.X.X
+  ```
+
+1. GitHub Actions [`release.yml`](../.github/workflows/release.yml) triggers automatically on the tag push, builds the MSI installer in a clean environment, and publishes the release on GitHub.
 
 ---
 
