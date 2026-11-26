@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 460" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="guiGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1e3a8a" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+    <linearGradient id="bridgeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#581c87" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+    <linearGradient id="nativeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#064e3b" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="outGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#334155" />
+      <stop offset="100%" stop-color="#475569" />
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.4" />
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#94a3b8" />
+    </marker>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="880" height="460" rx="16" fill="url(#bgGrad)" />
+
+  <!-- Layer 1: GUI Layer -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="30" width="800" height="95" rx="12" fill="url(#guiGrad)" stroke="#3b82f6" stroke-width="1.5" />
+    <text x="60" y="58" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#93c5fd" letter-spacing="1">GUI LAYER (C# · .NET 8 · WPF / MVVM)</text>
+    
+    <!-- GUI Components -->
+    <rect x="60" y="68" width="220" height="42" rx="8" fill="#1e293b" fill-opacity="0.8" stroke="#60a5fa" stroke-width="1" />
+    <text x="170" y="94" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#f8fafc" text-anchor="middle">Views (XAML Controls)</text>
+
+    <rect x="310" y="68" width="240" height="42" rx="8" fill="#1e293b" fill-opacity="0.8" stroke="#60a5fa" stroke-width="1" />
+    <text x="430" y="94" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#f8fafc" text-anchor="middle">ViewModels (INotifyChanged)</text>
+
+    <rect x="580" y="68" width="240" height="42" rx="8" fill="#1e293b" fill-opacity="0.8" stroke="#60a5fa" stroke-width="1" />
+    <text x="700" y="94" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#f8fafc" text-anchor="middle">Services (IAudioRouterService)</text>
+  </g>
+
+  <!-- Flow Arrow Down 1 -->
+  <line x1="440" y1="125" x2="440" y2="155" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow)" />
+
+  <!-- Layer 2: P/Invoke Boundary -->
+  <g filter="url(#shadow)">
+    <rect x="140" y="155" width="600" height="60" rx="10" fill="url(#bridgeGrad)" stroke="#a855f7" stroke-width="1.5" />
+    <text x="440" y="180" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#e9d5ff" text-anchor="middle" letter-spacing="0.5">P/INVOKE INTEROP BOUNDARY</text>
+    <text x="440" y="200" font-family="Consolas, monospace" font-size="12" fill="#f8fafc" text-anchor="middle">NativeAudioRouterInterop.cs ⟷ SoundBridgeBridge.dll (C-Exports)</text>
+  </g>
+
+  <!-- Flow Arrow Down 2 -->
+  <line x1="440" y1="215" x2="440" y2="245" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow)" />
+
+  <!-- Layer 3: Native Backend -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="245" width="800" height="95" rx="12" fill="url(#nativeGrad)" stroke="#10b981" stroke-width="1.5" />
+    <text x="60" y="273" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#a7f3d0" letter-spacing="1">NATIVE AUDIO ENGINE (C++17 · WASAPI · WIN32)</text>
+    
+    <!-- Native Components -->
+    <rect x="60" y="283" width="220" height="42" rx="8" fill="#0f172a" fill-opacity="0.8" stroke="#34d399" stroke-width="1" />
+    <text x="170" y="309" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#f8fafc" text-anchor="middle">WASAPI Capture Client</text>
+
+    <rect x="310" y="283" width="240" height="42" rx="8" fill="#0f172a" fill-opacity="0.8" stroke="#34d399" stroke-width="1" />
+    <text x="430" y="309" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#f8fafc" text-anchor="middle">Multi-Sink Mixing Loop</text>
+
+    <rect x="580" y="283" width="240" height="42" rx="8" fill="#0f172a" fill-opacity="0.8" stroke="#34d399" stroke-width="1" />
+    <text x="700" y="309" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#f8fafc" text-anchor="middle">WASAPI Render Clients (×N)</text>
+  </g>
+
+  <!-- Connectors to Outputs -->
+  <line x1="200" y1="340" x2="200" y2="375" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="440" y1="340" x2="440" y2="375" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)" />
+  <line x1="680" y1="340" x2="680" y2="375" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Physical Outputs -->
+  <g filter="url(#shadow)">
+    <rect x="80" y="375" width="240" height="50" rx="10" fill="url(#outGrad)" stroke="#64748b" stroke-width="1" />
+    <text x="200" y="405" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#f8fafc" text-anchor="middle">🎧 Output 1: Headphones</text>
+
+    <rect x="340" y="375" width="200" height="50" rx="10" fill="url(#outGrad)" stroke="#64748b" stroke-width="1" />
+    <text x="440" y="405" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#f8fafc" text-anchor="middle">🔊 Output 2: Desktop Speakers</text>
+
+    <rect x="560" y="375" width="240" height="50" rx="10" fill="url(#outGrad)" stroke="#64748b" stroke-width="1" />
+    <text x="680" y="405" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#f8fafc" text-anchor="middle">📡 Output N: HDMI / Bluetooth</text>
+  </g>
+</svg>
