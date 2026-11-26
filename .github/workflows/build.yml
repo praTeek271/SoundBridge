@@ -1,0 +1,64 @@
+name: Build & Verify
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+defaults:
+  run:
+    working-directory: SoundBridge
+
+jobs:
+  build:
+    name: Build C++ Backend & .NET 8 GUI
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.x"
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "latest"
+
+      - name: Configure & Build C++ Backend
+        shell: pwsh
+        run: |
+          cmake -S backend -B backend/build-integration -A x64
+          cmake --build backend/build-integration --config Release
+
+      - name: Restore & Build .NET 8 GUI
+        shell: pwsh
+        run: |
+          dotnet restore app/SoundBridge.Gui.csproj
+          dotnet build app/SoundBridge.Gui.csproj -c Release --no-restore
+
+      - name: Verify build outputs & metadata
+        shell: pwsh
+        run: |
+          $meta = Get-Content app.meta.json -Raw | ConvertFrom-Json
+          if ([string]::IsNullOrWhiteSpace($meta.product.version)) {
+            throw "app.meta.json product.version is missing"
+          }
+          Write-Host "Metadata version: $($meta.product.version)"
+
+          $exe = Get-ChildItem -Path app/bin/Release -Filter "SoundBridge.exe" -Recurse | Select-Object -First 1
+          if (-not $exe) { throw "SoundBridge.exe not found in Release output" }
+          Write-Host "Verified EXE: $($exe.FullName)"
+
+          $dll = Get-ChildItem -Path app/bin/Release -Filter "SoundBridgeBridge.dll" -Recurse | Select-Object -First 1
+          if (-not $dll) { throw "SoundBridgeBridge.dll not found in Release output" }
+          Write-Host "Verified Bridge DLL: $($dll.FullName)"

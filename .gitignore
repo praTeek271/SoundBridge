@@ -1,0 +1,57 @@
+# SoundBridge — .gitignore
+# Covers: C# / .NET 8, C++ / CMake, WiX installer, VS / Rider / VS Code IDE files
+
+# ── .NET / C# build output ────────────────────────────────────────────────────
+[Bb]in/
+[Oo]bj/
+**/[Bb]in/
+**/[Oo]bj/
+
+# ── C++ CMake build directories ───────────────────────────────────────────────
+backend/build*/
+backend/out/
+drivers.test/build*/
+**/build*/
+**/out/
+
+# ── WiX intermediate files ────────────────────────────────────────────────────
+.wix/
+**/.wix/
+
+# ── Generated dist output (recreated by build-msi.bat) ───────────────────────
+dist/
+**/dist/
+
+# ── User secrets / local overrides ───────────────────────────────────────────
+*.user
+*.suo
+.vs/
+.idea/
+*.DotSettings.user
+
+# ── VS Code workspace settings ────────────────────────────────────────────────
+.vscode/
+
+# ── OS noise ──────────────────────────────────────────────────────────────────
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# ── Log / temp files ──────────────────────────────────────────────────────────
+*.log
+*.tmp
+*.temp
+*.cache
+
+# ── NuGet / package restore ───────────────────────────────────────────────────
+*.nupkg
+packages/
+!**/packages/repositories.config
+
+# ── Third-party drivers / resources ──────────────────────────────────────────
+# These live on the `third-party-resources` branch, not main.
+# Exclude them here so they never accidentally land on main.
+drivers/
+third-party/
+vendor/
