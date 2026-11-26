@@ -60,7 +60,7 @@ jobs:
         shell: pwsh
         run: |
           dotnet tool install --global wix
-          wix extension add --global WixToolset.UI.wixext
+          wix extension add --global WixToolset.UI.wixext -acceptEula wix7
 
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
